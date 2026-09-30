@@ -1,0 +1,75 @@
+{{/* carousel.html - slider. The track is a scroll-snap list, so swiping and
+     scrolling still work with JS off; main.js adds autoplay, arrows and dots.
+     Options under params.carousel. */}}
+{{- $c := .Site.Params.carousel | default dict -}}
+{{- $slides := $c.slides | default slice -}}
+{{- if and ($c.enable | default false) (gt (len $slides) 0) }}
+
+<section class="rf-carousel"
+         data-rf-carousel
+         data-autoplay="{{ $c.autoplay | default false }}"
+         data-interval="{{ $c.interval | default 5000 }}"
+         aria-roledescription="carousel"
+         aria-label="{{ $c.title | default "Featured highlights" }}">
+
+  {{- with $c.title }}
+    <h2 class="rf-carousel__heading">{{ . }}</h2>
+  {{- end }}
+
+  {{- if $c.showArrows | default true }}
+    <button type="button" class="rf-carousel__arrow rf-carousel__arrow--prev" data-rf-carousel-prev aria-label="Previous slide">
+      <span aria-hidden="true">❮</span>
+    </button>
+    <button type="button" class="rf-carousel__arrow rf-carousel__arrow--next" data-rf-carousel-next aria-label="Next slide">
+      <span aria-hidden="true">❯</span>
+    </button>
+  {{- end }}
+
+  <div class="rf-carousel__viewport" data-rf-carousel-viewport tabindex="0" aria-live="polite">
+    <ul class="rf-carousel__track">
+      {{- range $i, $s := $slides }}
+        <li class="rf-carousel__slide" role="group" aria-roledescription="slide"
+            aria-label="Slide {{ add $i 1 }} of {{ len $slides }}" data-rf-slide>
+
+          {{- $inner := "rf-carousel__link" -}}
+          {{- if $s.link }}
+            <a class="{{ $inner }}" href="{{ $s.link | relLangURL }}">
+          {{- else }}
+            <div class="{{ $inner }}">
+          {{- end }}
+
+            {{- with $s.image }}
+              <img class="rf-carousel__img" src="{{ . | relURL }}"
+                   alt="{{ $s.alt | default $s.title | default "" }}"
+                   loading="{{ if eq $i 0 }}eager{{ else }}lazy{{ end }}"
+                   decoding="async">
+            {{- end }}
+
+            {{- if or $s.title $s.text $s.label }}
+              <div class="rf-carousel__caption">
+                {{- with $s.title }}<h3 class="rf-carousel__title">{{ . }}</h3>{{ end }}
+                {{- with $s.text }}<p class="rf-carousel__text">{{ . }}</p>{{ end }}
+                {{- with $s.label }}
+                  <span class="rf-btn rf-btn--sm rf-btn--primary">{{ . }} »</span>
+                {{- end }}
+              </div>
+            {{- end }}
+
+          {{- if $s.link }}</a>{{ else }}</div>{{ end }}
+        </li>
+      {{- end }}
+    </ul>
+  </div>
+
+  {{- if $c.showDots | default true }}
+    <div class="rf-carousel__dots" role="tablist" aria-label="Choose slide">
+      {{- range $i, $s := $slides }}
+        <button type="button" class="rf-carousel__dot{{ if eq $i 0 }} is-active{{ end }}"
+                role="tab" aria-selected="{{ if eq $i 0 }}true{{ else }}false{{ end }}"
+                aria-label="Slide {{ add $i 1 }}" data-rf-carousel-dot="{{ $i }}"></button>
+      {{- end }}
+    </div>
+  {{- end }}
+
+</section>
+{{- end }}

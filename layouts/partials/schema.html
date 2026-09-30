@@ -1,0 +1,79 @@
+{{/* schema.html - JSON-LD. One block per page: WebSite on the home page,
+     BlogPosting for posts, WebPage or CollectionPage elsewhere.
+
+     Built as a dict and run through jsonify + safeJS, so a quote in a title
+     can't break the JSON or the script tag. */}}
+
+{{- $site := .Site -}}
+{{- $logo := $site.Params.logo | default dict -}}
+{{- $nav  := $site.Params.navbar | default dict -}}
+
+{{- /* Author name: params.author, with params.sidebar.authorName winning. */ -}}
+{{- $authorName := $site.Params.author | default $site.Title -}}
+{{- with $site.Params.sidebar }}{{ with .authorName }}{{ $authorName = . }}{{ end }}{{ end -}}
+
+{{- $publisher := dict "@type" "Organization" "name" $site.Title "url" $site.Home.Permalink -}}
+{{- with $logo.image -}}
+  {{- $publisher = merge $publisher (dict "logo" (dict "@type" "ImageObject" "url" (. | absURL))) -}}
+{{- end -}}
+
+{{- $data := dict -}}
+
+{{- if .IsHome -}}
+
+  {{- $data = dict
+        "@context"  "https://schema.org"
+        "@type"     "WebSite"
+        "name"      $site.Title
+        "url"       $site.Home.Permalink
+        "publisher" $publisher -}}
+  {{- with $site.Params.description }}{{ $data = merge $data (dict "description" .) }}{{ end -}}
+  {{- with $site.Language.Lang }}{{ $data = merge $data (dict "inLanguage" .) }}{{ end -}}
+  {{- with $nav.searchURL -}}
+    {{- $data = merge $data (dict "potentialAction" (dict
+          "@type"       "SearchAction"
+          "target"      (dict "@type" "EntryPoint" "urlTemplate" (printf "%s?q={search_term_string}" (. | absURL)))
+          "query-input" "required name=search_term_string")) -}}
+  {{- end -}}
+
+{{- else if .IsPage -}}
+
+  {{- $type := "WebPage" -}}
+  {{- if in ($site.Params.mainSections | default (slice "posts")) .Section }}{{ $type = "BlogPosting" }}{{ end -}}
+
+  {{- $data = dict
+        "@context"         "https://schema.org"
+        "@type"            $type
+        "headline"         (.Title | plainify)
+        "url"              .Permalink
+        "mainEntityOfPage" (dict "@type" "WebPage" "@id" .Permalink)
+        "publisher"        $publisher
+        "author"           (dict "@type" "Person" "name" $authorName) -}}
+
+  {{- with .Description }}{{ $data = merge $data (dict "description" (. | plainify)) }}{{ end -}}
+  {{- with .PublishDate }}{{ $data = merge $data (dict "datePublished" (.Format "2006-01-02T15:04:05Z07:00")) }}{{ end -}}
+  {{- with .Lastmod }}{{ $data = merge $data (dict "dateModified" (.Format "2006-01-02T15:04:05Z07:00")) }}{{ end -}}
+  {{- with $site.Language.Lang }}{{ $data = merge $data (dict "inLanguage" .) }}{{ end -}}
+  {{- with .WordCount }}{{ $data = merge $data (dict "wordCount" .) }}{{ end -}}
+  {{- with .Params.tags }}{{ $data = merge $data (dict "keywords" .) }}{{ end -}}
+  {{- with .Params.categories }}
+    {{- $data = merge $data (dict "articleSection" (index . 0)) -}}
+  {{- end -}}
+  {{- with .Params.cover }}{{ with .image }}
+    {{- $data = merge $data (dict "image" (slice (. | absURL))) -}}
+  {{- end }}{{ end -}}
+
+{{- else -}}
+
+  {{- $data = dict
+        "@context"  "https://schema.org"
+        "@type"     "CollectionPage"
+        "name"      (.Title | plainify)
+        "url"       .Permalink
+        "publisher" $publisher -}}
+  {{- with .Description }}{{ $data = merge $data (dict "description" (. | plainify)) }}{{ end -}}
+  {{- with $site.Language.Lang }}{{ $data = merge $data (dict "inLanguage" .) }}{{ end -}}
+
+{{- end -}}
+
+<script type="application/ld+json">{{ $data | jsonify | safeJS }}</script>

@@ -1,0 +1,76 @@
+{{/* hero.html - business-mode banner. Options under params.hero. */}}
+{{- $h := .Site.Params.hero | default dict -}}
+{{- if $h.enable | default false }}
+
+  {{- $align := $h.align | default "center" -}}
+  {{- $layout := $h.layout | default "stacked" -}}
+  {{- $style := "" -}}
+  {{- with $h.background -}}
+    {{- $style = printf "background-image:linear-gradient(rgba(0,0,0,%v),rgba(0,0,0,%v)),url('%s')"
+        ($h.overlay | default 0.35) ($h.overlay | default 0.35) (. | relURL) -}}
+  {{- end -}}
+
+  <section class="rf-hero rf-hero--{{ $align }} rf-hero--{{ $layout }}{{ if $h.background }} rf-hero--has-bg{{ end }}"
+           {{ with $style }}style="{{ . | safeCSS }}"{{ end }}>
+
+    <div class="rf-hero__inner">
+
+      <div class="rf-hero__copy">
+        {{- with $h.eyebrow }}
+          <p class="rf-hero__eyebrow"><span class="rf-flag">{{ . }}</span></p>
+        {{- end }}
+
+        {{- with $h.title }}
+          <h1 class="rf-hero__title">{{ . | safeHTML }}</h1>
+        {{- end }}
+
+        {{- with $h.subtitle }}
+          <p class="rf-hero__subtitle">{{ . | safeHTML }}</p>
+        {{- end }}
+
+        {{- with $h.text }}
+          <div class="rf-hero__text">{{ . | safeHTML }}</div>
+        {{- end }}
+
+        {{- with $h.buttons }}
+          <p class="rf-hero__actions">
+            {{- range . }}
+              {{- $cls := "rf-btn rf-btn--lg" -}}
+              {{- if eq (.style | default "primary") "primary" }}{{ $cls = printf "%s rf-btn--primary" $cls }}
+              {{- else if eq .style "accent" }}{{ $cls = printf "%s rf-btn--accent" $cls }}
+              {{- else if eq .style "ghost" }}{{ $cls = printf "%s rf-btn--ghost" $cls }}{{ end -}}
+              {{- $btnIcon := partial "svg-icon.html" .icon -}}
+              <a class="{{ $cls }}" href="{{ .url | relLangURL }}">
+                {{- if $btnIcon }} {{ $btnIcon | safeHTML }}
+                {{- else }}{{ with .icon }} <span aria-hidden="true">{{ . }}</span>{{ end }}{{ end }}
+                {{ .label }}
+              </a>
+            {{- end }}
+          </p>
+        {{- end }}
+
+        {{- with $h.note }}
+          <p class="rf-hero__note">{{ . | safeHTML }}</p>
+        {{- end }}
+      </div>
+
+      {{- with $h.image }}
+        <div class="rf-hero__media">
+          <div class="rf-window rf-window--framed">
+            <div class="rf-window__bar">
+              <span class="rf-window__title">{{ $h.imageTitle | default "featured.gif" }}</span>
+              <span class="rf-window__controls" aria-hidden="true">
+                <span class="rf-window__btn">_</span>
+                <span class="rf-window__btn">□</span>
+                <span class="rf-window__btn rf-window__btn--close">×</span>
+              </span>
+            </div>
+            <img class="rf-window__img" src="{{ . | relURL }}"
+                 alt="{{ $h.imageAlt | default "" }}" loading="eager" decoding="async">
+          </div>
+        </div>
+      {{- end }}
+
+    </div>
+  </section>
+{{- end }}

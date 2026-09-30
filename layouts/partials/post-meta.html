@@ -1,0 +1,67 @@
+{{/* post-meta.html - the metadata strip. Takes a dict of {page, context},
+     where context is "list" or "single". Which items appear is controlled by
+     params.features and params.post. */}}
+{{- $p        := .page -}}
+{{- $ctx      := .context | default "list" -}}
+{{- $feat     := $p.Site.Params.features | default dict -}}
+{{- $postCfg  := $p.Site.Params.post     | default dict -}}
+{{- $dateFmt  := $p.Site.Params.dateFormat | default "Jan 2, 2006" -}}
+{{- $author   := $p.Params.author | default $p.Site.Params.author -}}
+
+<div class="rf-meta rf-meta--{{ $ctx }}" role="group" aria-label="Post details">
+
+  {{- with $author }}
+    <span class="rf-meta__item rf-meta__item--author" title="Author">
+      {{ with partial "svg-icon.html" "pencil" }}{{ . | safeHTML }}{{ end }}
+      <span class="rf-visually-hidden">Author:</span>
+      <span class="rf-meta__value">{{ . }}</span>
+    </span>
+  {{- end }}
+
+  {{- if $feat.publishDate | default true }}
+    <span class="rf-meta__item rf-meta__item--date" title="Published">
+      {{ with partial "svg-icon.html" "calendar" }}{{ . | safeHTML }}{{ end }}
+      <span class="rf-visually-hidden">Published:</span>
+      <time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format $dateFmt }}</time>
+    </span>
+  {{- end }}
+
+  {{- if $p.Lastmod.After $p.Date }}
+    {{- if $postCfg.showLastmod | default true }}
+      <span class="rf-meta__item rf-meta__item--lastmod" title="Last updated">
+        {{ with partial "svg-icon.html" "refresh" }}{{ . | safeHTML }}{{ end }}
+        <span class="rf-visually-hidden">Last updated:</span>
+        <time datetime="{{ $p.Lastmod.Format "2006-01-02" }}">{{ $p.Lastmod.Format $dateFmt }}</time>
+      </span>
+    {{- end }}
+  {{- end }}
+
+  {{- if and ($postCfg.readingTime | default true) $p.IsPage }}
+    <span class="rf-meta__item rf-meta__item--reading" title="Estimated reading time">
+      {{ with partial "svg-icon.html" "clock" }}{{ . | safeHTML }}{{ end }}
+      <span class="rf-visually-hidden">Reading time:</span>
+      {{ $p.ReadingTime }} min read
+    </span>
+  {{- end }}
+
+  {{- if and ($postCfg.wordCount | default false) $p.IsPage }}
+    <span class="rf-meta__item" title="Word count">
+      {{ with partial "svg-icon.html" "list" }}{{ . | safeHTML }}{{ end }}
+      <span class="rf-visually-hidden">Words:</span>
+      {{ $p.WordCount }} words
+    </span>
+  {{- end }}
+
+  {{- if eq $ctx "single" }}
+    {{- with $p.Params.categories }}
+      <span class="rf-meta__item rf-meta__item--cats">
+        {{ with partial "svg-icon.html" "folder" }}{{ . | safeHTML }}{{ end }}
+        <span class="rf-visually-hidden">Categories:</span>
+        {{- range $i, $c := . }}{{ if $i }}, {{ end -}}
+          <a href="{{ printf "categories/%s/" ($c | urlize) | relURL }}">{{ $c }}</a>
+        {{- end }}
+      </span>
+    {{- end }}
+  {{- end }}
+
+</div>

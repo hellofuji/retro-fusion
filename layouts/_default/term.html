@@ -1,0 +1,8 @@
+{{/* A single taxonomy term's page, e.g. /tags/hugo/.
+
+     Newer Hugo resolves this file for kind `term`. The body lives in
+     partials/term-posts.html so taxonomy/list.html, which older releases use
+     for the same page, can share it. */}}
+{{ define "main" }}
+  {{ partial "term-posts.html" . }}
+{{ end }}

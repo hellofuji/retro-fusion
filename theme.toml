@@ -1,0 +1,37 @@
+# theme.toml - metadata for the Hugo themes showcase. Not site config;
+# see exampleSite/hugo.toml for the settings you actually edit.
+
+name = "Retro Fusion"
+license = "MIT"
+licenselink = "https://github.com/hellofuji/retro-fusion/blob/main/LICENSE"
+description = "A small Hugo theme inspired by early web culture. One stylesheet, one script, no build step, no third-party requests."
+homepage = "https://github.com/hellofuji/retro-fusion"
+demosite = "https://retro-fusion.abhishkkumar.com/"
+
+tags = [
+  "blog",
+  "business",
+  "minimal",
+  "responsive",
+  "accessible",
+  "customizable",
+  "retro",
+  "seo"
+]
+features = [
+  "Blog or business homepage, switched by one config value",
+  "Configurable palette, background texture and fonts",
+  "Text or image logo, sticky multi-level navigation, breadcrumbs",
+  "Hero, carousel, services grid, FAQ accordion, reorderable",
+  "Sticky sidebar: author, visitor counter, recent posts, tags",
+  "Table of contents, share buttons, prev/next, related posts",
+  "Inline SVG icon set - no icon font, no extra request",
+  "Analytics off by default; GA4, Plausible or your own snippet",
+  "JSON-LD, Open Graph, sitemap and robots out of the box",
+  "Works without JavaScript; reduced-motion and high-contrast aware"
+]
+min_version = "0.146.0"
+
+[author]
+  name = "Abhishek Kumar"
+  homepage = "https://github.com/hellofuji"

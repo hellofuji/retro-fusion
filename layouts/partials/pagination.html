@@ -1,0 +1,42 @@
+{{/* pagination.html - pager. Pass the Paginator itself, or a dict with a
+     "paginator" key. */}}
+{{- $p := . -}}
+{{- if reflect.IsMap . }}{{ $p = .paginator }}{{ end -}}
+
+{{- if and $p (gt $p.TotalPages 1) }}
+<nav class="rf-pagination" aria-label="Pagination">
+
+  {{- if $p.HasPrev }}
+    <a class="rf-btn rf-btn--sm rf-pagination__prev" href="{{ $p.Prev.URL }}" rel="prev">
+      <span aria-hidden="true">«</span> Newer
+    </a>
+  {{- else }}
+    <span class="rf-btn rf-btn--sm rf-pagination__prev is-disabled" aria-disabled="true">
+      <span aria-hidden="true">«</span> Newer
+    </span>
+  {{- end }}
+
+  <ol class="rf-pagination__pages">
+    {{- range $p.Pagers }}
+      <li>
+        {{- if eq . $p }}
+          <span class="rf-pagination__num is-current" aria-current="page">{{ .PageNumber }}</span>
+        {{- else }}
+          <a class="rf-pagination__num" href="{{ .URL }}" aria-label="Page {{ .PageNumber }}">{{ .PageNumber }}</a>
+        {{- end }}
+      </li>
+    {{- end }}
+  </ol>
+
+  {{- if $p.HasNext }}
+    <a class="rf-btn rf-btn--sm rf-pagination__next" href="{{ $p.Next.URL }}" rel="next">
+      Older <span aria-hidden="true">»</span>
+    </a>
+  {{- else }}
+    <span class="rf-btn rf-btn--sm rf-pagination__next is-disabled" aria-disabled="true">
+      Older <span aria-hidden="true">»</span>
+    </span>
+  {{- end }}
+
+</nav>
+{{- end }}

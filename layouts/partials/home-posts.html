@@ -1,0 +1,26 @@
+{{/* Latest-posts strip for the business homepage (params.home.recent*).
+
+     Sorted by date, not by weight. Hugo sorts weight first, so a post given a
+     weight for menu ordering would otherwise jump into this feed. */}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- if $home.recentPosts | default true -}}
+  {{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
+  {{- $posts := (where .Site.RegularPages "Section" "in" $mainSections).ByDate.Reverse -}}
+  {{- $count := $home.recentCount | default 3 -}}
+  {{- with first $count $posts }}
+    <section class="rf-section rf-section--recent">
+      <header class="rf-section__head">
+        <h2 class="rf-section__title">{{ $home.recentTitle | default "Latest From the Blog" }}</h2>
+        {{- with $home.recentSubtitle }}<p class="rf-section__subtitle">{{ . }}</p>{{ end }}
+      </header>
+
+      <div class="rf-cards rf-cards--{{ $home.recentColumns | default 3 }}">
+        {{- range . }}{{ .Render "summary" }}{{ end }}
+      </div>
+
+      <p class="rf-section__more">
+        <a class="rf-btn" href="{{ "posts/" | relLangURL }}">Browse all posts »</a>
+      </p>
+    </section>
+  {{- end }}
+{{- end }}

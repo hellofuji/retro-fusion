@@ -1,0 +1,57 @@
+{{/* share.html - share buttons. Plain links and mailto:, no third-party
+     script. Toggle with params.post.share, or `share: false` on a page.
+
+     The full URLs are built up front and passed through safeURL: Go's
+     html/template re-escapes a value inside an href, which would otherwise
+     turn an already-encoded %3A into %253A. */}}
+{{- $postCfg := .Site.Params.post | default dict -}}
+{{- if and ($postCfg.share | default true) (ne .Params.share false) }}
+
+  {{- $url := .Permalink -}}
+  {{- $title := .Title -}}
+  {{- $eq := urlquery $url -}}
+  {{- $et := urlquery $title -}}
+
+  {{- $urls := dict
+      "x"        (printf "https://twitter.com/intent/tweet?url=%s&text=%s" $eq $et)
+      "facebook" (printf "https://www.facebook.com/sharer/sharer.php?u=%s" $eq)
+      "linkedin" (printf "https://www.linkedin.com/sharing/share-offsite/?url=%s" $eq)
+      "reddit"   (printf "https://www.reddit.com/submit?url=%s&title=%s" $eq $et)
+      "telegram" (printf "https://t.me/share/url?url=%s&text=%s" $eq $et)
+      "email"    (printf "mailto:?subject=%s&body=%s" $et $eq)
+  -}}
+
+  {{- $nets := $postCfg.shareNetworks | default (slice "x" "facebook" "linkedin" "reddit" "mastodon" "email") -}}
+
+  <div class="rf-share" role="group" aria-label="Share this page">
+    <span class="rf-share__label">Share:</span>
+
+    {{- range $nets }}
+      {{- $key := . -}}
+      {{- $icon := partial "svg-icon.html" $key -}}
+      {{- with index $urls $key }}
+        <a class="rf-btn rf-btn--sm rf-share__btn" href="{{ . | safeURL }}"
+           rel="noopener nofollow" target="_blank">
+          {{- with $icon }} {{ . | safeHTML }}{{ end }}
+          {{ $key | humanize | title }}
+        </a>
+      {{- else }}
+        {{- if eq $key "mastodon" }}
+          <a class="rf-btn rf-btn--sm rf-share__btn" href="#"
+             data-rf-mastodon="{{ $eq }}" data-rf-title="{{ $title }}"
+             rel="noopener nofollow">
+            {{- with $icon }} {{ . | safeHTML }}{{ end }} Mastodon
+          </a>
+        {{- else if eq $key "copy" }}
+          <button type="button" class="rf-btn rf-btn--sm rf-share__btn" data-rf-copy="{{ $url }}">
+            {{- with $icon }} {{ . | safeHTML }}{{ end }} Copy link
+          </button>
+        {{- else if eq $key "print" }}
+          <button type="button" class="rf-btn rf-btn--sm rf-share__btn" data-rf-print>
+            {{- with $icon }} {{ . | safeHTML }}{{ end }} Print
+          </button>
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  </div>
+{{- end }}

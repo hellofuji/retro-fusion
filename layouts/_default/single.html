@@ -1,0 +1,124 @@
+{{/* single.html - one post or page: title bar, meta, TOC, content, tags,
+     share, author box, prev/next, related posts.
+     Gets a sidebar in blog mode. */}}
+{{ define "main" }}
+
+{{- $mode := .Site.Params.mode | default "blog" -}}
+{{- $sb   := .Site.Params.sidebar | default dict -}}
+{{- $postCfg := .Site.Params.post | default dict -}}
+{{- $isPost := in (.Site.Params.mainSections | default (slice "posts")) .Section -}}
+{{- $showSidebar := and $isPost (eq $mode "blog") ($sb.enable | default true) ($sb.onSingle | default true) -}}
+
+<div class="rf-layout{{ if $showSidebar }} rf-layout--with-sidebar{{ end }}">
+
+  <div class="rf-layout__main">
+    {{- /* Structured data for this page is emitted as JSON-LD in <head> by
+           partials/schema.html. No microdata here, so there is one source of
+           truth rather than two partial ones. */ -}}
+    <article class="rf-article rf-window">
+
+      <header class="rf-window__bar rf-article__bar">
+        <h1 class="rf-window__title">{{ .Title }}</h1>
+        <span class="rf-window__controls" aria-hidden="true">
+          <span class="rf-window__btn">_</span><span class="rf-window__btn">□</span><span class="rf-window__btn rf-window__btn--close">×</span>
+        </span>
+      </header>
+
+      <div class="rf-window__body">
+
+        <div class="rf-article__intro">
+          {{ partial "post-meta.html" (dict "page" . "context" "single") }}
+          {{- with .Description }}<p class="rf-article__lede">{{ . }}</p>{{ end }}
+        </div>
+
+        {{ partial "toc.html" . }}
+
+        <div class="rf-prose rf-article__content">
+          {{ .Content }}
+        </div>
+
+        {{- /* ---------- Tags ---------- */ -}}
+        {{- with .GetTerms "tags" }}
+          <footer class="rf-article__tags">
+            <span class="rf-article__tags-label">Tags:</span>
+            {{- range . }}
+              <a class="rf-chip" href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>
+            {{- end }}
+          </footer>
+        {{- end }}
+
+        {{ partial "share.html" . }}
+
+      </div>
+    </article>
+
+    {{- /* ---------- Author box (posts only) ----------
+         Same author-info partial as the sidebar, so name/avatar/bio are set
+         once in params.author* (or overridden per-site in params.sidebar.*). */ -}}
+    {{- if and $isPost ($postCfg.authorBox | default true) }}
+      {{- $a := partial "author-info.html" . }}
+      {{- if $a.name }}
+        <section class="rf-window rf-author-box">
+          <div class="rf-window__bar">
+            <h2 class="rf-window__title">Written by</h2>
+          </div>
+          <div class="rf-window__body rf-author">
+            {{- with $a.image }}
+              <img class="rf-author__avatar" src="{{ . | relURL }}" alt="{{ $a.name }}" width="80" height="80" loading="lazy">
+            {{- end }}
+            <div>
+              <p class="rf-author__name">{{ $a.name }}</p>
+              {{- with $a.bio }}<p class="rf-author__bio">{{ . | safeHTML }}</p>{{ end }}
+            </div>
+          </div>
+        </section>
+      {{- end }}
+    {{- end }}
+
+    {{- /* ---------- Prev / Next ---------- */ -}}
+    {{- if $postCfg.prevNext | default true }}
+      {{- $prev := .PrevInSection -}}
+      {{- $next := .NextInSection -}}
+      {{- if or $prev $next }}
+        <nav class="rf-prevnext" aria-label="Post navigation">
+          {{- with $prev }}
+            <a class="rf-prevnext__item rf-prevnext__item--prev" href="{{ .RelPermalink }}" rel="prev">
+              <span class="rf-prevnext__label">« Previous</span>
+              <span class="rf-prevnext__title">{{ .Title }}</span>
+            </a>
+          {{- else }}<span class="rf-prevnext__item is-empty" aria-hidden="true"></span>{{ end }}
+
+          {{- with $next }}
+            <a class="rf-prevnext__item rf-prevnext__item--next" href="{{ .RelPermalink }}" rel="next">
+              <span class="rf-prevnext__label">Next »</span>
+              <span class="rf-prevnext__title">{{ .Title }}</span>
+            </a>
+          {{- else }}<span class="rf-prevnext__item is-empty" aria-hidden="true"></span>{{ end }}
+        </nav>
+      {{- end }}
+    {{- end }}
+
+    {{- /* ---------- Related posts ---------- */ -}}
+    {{- if $postCfg.related | default true }}
+      {{- $related := .Site.RegularPages.Related . | first ($postCfg.relatedCount | default 3) -}}
+      {{- with $related }}
+        <section class="rf-section rf-related">
+          <header class="rf-section__head">
+            <h2 class="rf-section__title">You Might Also Like</h2>
+          </header>
+          <div class="rf-cards rf-cards--3">
+            {{- range . }}{{ .Render "summary" }}{{ end }}
+          </div>
+        </section>
+      {{- end }}
+    {{- end }}
+
+  </div>
+
+  {{- if $showSidebar }}
+    {{ partial "sidebar.html" . }}
+  {{- end }}
+
+</div>
+
+{{ end }}

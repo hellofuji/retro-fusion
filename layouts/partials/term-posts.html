@@ -1,0 +1,62 @@
+{{/* The posts filed under one taxonomy term, e.g. /tags/hugo/.
+
+     This is a partial because the lookup path for term pages changed across
+     Hugo versions: newer releases resolve _default/term.html, older ones
+     taxonomy/list.html. Both are thin wrappers around this file. */}}
+{{- $mode := .Site.Params.mode | default "blog" -}}
+{{- $sb   := .Site.Params.sidebar | default dict -}}
+{{- $showSidebar := and ($sb.enable | default true) (eq $mode "blog") -}}
+{{- $paginator := .Paginate .Pages -}}
+{{- $kind := .Data.Singular | default "term" -}}
+{{- $kindPlural := .Data.Plural | default (printf "%ss" $kind) -}}
+{{- $termsPage := "" -}}
+{{- with .Parent }}{{ if eq .Kind "taxonomy" }}{{ $termsPage = . }}{{ end }}{{ end -}}
+
+<div class="rf-layout{{ if $showSidebar }} rf-layout--with-sidebar{{ end }}">
+
+  <div class="rf-layout__main">
+
+    <section class="rf-window rf-archive-head">
+      <div class="rf-window__bar">
+        <h1 class="rf-window__title">{{ $kind | humanize | title }}: {{ .Title }}</h1>
+        <span class="rf-window__controls" aria-hidden="true">
+          <span class="rf-window__btn">_</span><span class="rf-window__btn">□</span><span class="rf-window__btn rf-window__btn--close">×</span>
+        </span>
+      </div>
+      <div class="rf-window__body">
+        {{- with .Description }}<p class="rf-archive-head__desc">{{ . }}</p>{{ end }}
+        {{- with .Content }}<div class="rf-prose">{{ . }}</div>{{ end }}
+
+        <p class="rf-archive-head__count">
+          <span class="rf-count-badge">{{ len .Pages }}</span>
+          {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }} filed under
+          <strong>{{ .Title }}</strong>.
+        </p>
+
+        {{- with $termsPage }}
+          <p><a class="rf-btn rf-btn--sm" href="{{ .RelPermalink }}">« All {{ $kindPlural | humanize | title }}</a></p>
+        {{- end }}
+      </div>
+    </section>
+
+    {{- if $paginator.Pages }}
+      <div class="{{ partial "cards-class.html" . }}">
+        {{- range $paginator.Pages }}{{ .Render "summary" }}{{ end }}
+      </div>
+      {{ partial "pagination.html" $paginator }}
+    {{- else }}
+      <div class="rf-window">
+        <div class="rf-window__body rf-empty">
+          <p><strong>No posts here yet.</strong> 🚧</p>
+          <p><a href="{{ .Site.Home.RelPermalink }}">Back to the homepage »</a></p>
+        </div>
+      </div>
+    {{- end }}
+
+  </div>
+
+  {{- if $showSidebar }}
+    {{ partial "sidebar.html" . }}
+  {{- end }}
+
+</div>

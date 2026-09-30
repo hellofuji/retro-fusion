@@ -1,0 +1,105 @@
+{{/* index.html - the homepage.
+
+     params.mode = "blog"     -> post index with a sidebar
+     params.mode = "business" -> the blocks listed in params.home.sections */}}
+{{ define "main" }}
+
+{{- $mode := .Site.Params.mode | default "blog" -}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- $hero := .Site.Params.hero | default dict -}}
+{{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
+{{- /* Date-sorted explicitly: Hugo orders pages by weight first and date
+       second, so a `weight` set for menu ordering would otherwise promote a
+       post into the "latest posts" feed. */ -}}
+{{- $posts := (where .Site.RegularPages "Section" "in" $mainSections).ByDate.Reverse -}}
+
+{{- /* Section order for the business homepage. Set params.home.sections to
+       reorder or drop blocks; anything unrecognised is ignored. Omitting the
+       param entirely keeps the default order below. Visibility is separate:
+       each block still honours its own `enable` flag. */ -}}
+{{- $order := $home.sections | default (slice "hero" "carousel" "services" "content" "faq" "posts" "cta") -}}
+{{- /* Accept a comma-separated string too, so `sections = "hero,faq"` works as
+       well as the proper `sections = ["hero", "faq"]`. Without this, getting
+       the TOML brackets wrong fails the build with a confusing
+       "range can't iterate over ..." error. */ -}}
+{{- if not (reflect.IsSlice $order) -}}
+  {{- $list := slice -}}
+  {{- range split (printf "%v" $order) "," -}}
+    {{- $list = $list | append (trim . " ") -}}
+  {{- end -}}
+  {{- $order = $list -}}
+{{- end -}}
+
+{{- /* Every page needs exactly one <h1>. In business mode the hero supplies it;
+       in blog mode the intro window does. When neither is rendered we fall back
+       to a visually-hidden site title so the document outline stays valid. */ -}}
+{{- $heroProvidesH1 := and (in $order "hero") ($hero.enable | default false) ($hero.title | default "") -}}
+{{- $introProvidesH1 := and (eq $mode "blog") ($home.showIntro | default true) .Content -}}
+
+{{ if eq $mode "business" }}
+
+  {{- /* ================= BUSINESS MODE ================= */ -}}
+
+  {{ if not $heroProvidesH1 }}
+    <h1 class="rf-visually-hidden">{{ .Site.Title }}</h1>
+  {{ end }}
+
+  {{- range $order }}
+    {{- if eq . "hero" }}{{ partial "hero.html" $ }}
+    {{- else if eq . "carousel" }}{{ partial "carousel.html" $ }}
+    {{- else if eq . "services" }}{{ partial "services.html" $ }}
+    {{- else if eq . "content" }}{{ partial "home-content.html" $ }}
+    {{- else if eq . "faq" }}{{ partial "faq.html" $ }}
+    {{- else if eq . "posts" }}{{ partial "home-posts.html" $ }}
+    {{- else if eq . "cta" }}{{ partial "home-cta.html" $ }}
+    {{- end }}
+  {{- end }}
+
+{{ else }}
+
+  {{- /* ================= BLOG MODE ================= */ -}}
+
+  {{- if $introProvidesH1 }}
+    <section class="rf-section rf-window">
+      <div class="rf-window__bar">
+        <h1 class="rf-window__title">{{ $home.introTitle | default "Welcome to my homepage!" }}</h1>
+        <span class="rf-window__controls" aria-hidden="true">
+          <span class="rf-window__btn">_</span><span class="rf-window__btn">□</span><span class="rf-window__btn rf-window__btn--close">×</span>
+        </span>
+      </div>
+      <div class="rf-window__body rf-prose">{{ .Content }}</div>
+    </section>
+  {{- else }}
+    <h1 class="rf-visually-hidden">{{ .Site.Title }}</h1>
+  {{- end }}
+
+  <div class="rf-layout rf-layout--with-sidebar">
+
+    <div class="rf-layout__main">
+      <header class="rf-section__head rf-section__head--bar">
+        <h2 class="rf-section__title">{{ $home.postsTitle | default "Recent Posts" }}</h2>
+      </header>
+
+      {{- $paginator := .Paginate $posts -}}
+      {{- if $paginator.Pages }}
+        <div class="{{ partial "cards-class.html" . }}">
+          {{- range $paginator.Pages }}{{ .Render "summary" }}{{ end }}
+        </div>
+        {{ partial "pagination.html" $paginator }}
+      {{- else }}
+        <div class="rf-window">
+          <div class="rf-window__body rf-empty">
+            <p><strong>Under construction!</strong> 🚧</p>
+            <p>No posts have been published yet. Check back soon.</p>
+          </div>
+        </div>
+      {{- end }}
+    </div>
+
+    {{ partial "sidebar.html" . }}
+
+  </div>
+
+{{ end }}
+
+{{ end }}

@@ -1,0 +1,122 @@
+{{/* footer.html - one brand column, then one column per
+     [[params.footer.links]] block, then badges and social icons. */}}
+{{- $f     := .Site.Params.footer | default dict -}}
+{{- $logo  := .Site.Params.logo   | default dict -}}
+{{- $links := $f.links | default slice -}}
+{{- $social := $f.social | default slice -}}
+{{- $badges := $f.badges | default slice -}}
+{{- $useDefaultBadges := and (eq (len $badges) 0) ($f.defaultBadges | default true) -}}
+
+<footer class="rf-footer" id="footer">
+  <div class="rf-footer__inner">
+
+    <div class="rf-footer__grid">
+
+      {{- /* ---- Column 1: logo and about text ---- */ -}}
+      <div class="rf-footer__col rf-footer__col--brand">
+        {{- if $f.showLogo | default true }}
+          <p class="rf-footer__logo">
+            {{- if $logo.image }}
+              <img src="{{ $logo.image | relURL }}" alt="{{ $logo.alt | default .Site.Title }}" width="{{ $logo.width | default 180 }}" loading="lazy">
+            {{- else }}
+              <span class="rf-logo__text rf-logo__text--{{ $logo.style | default "pixel" }}">{{ $logo.text | default .Site.Title }}</span>
+            {{- end }}
+          </p>
+        {{- end }}
+
+        {{- with $f.aboutTitle }}<h2 class="rf-footer__heading">{{ . }}</h2>{{ end }}
+        {{- with $f.about }}<p class="rf-footer__about">{{ . | safeHTML }}</p>{{ end }}
+
+        {{- with .Site.Params.tagline }}<p class="rf-footer__tagline">{{ . }}</p>{{ end }}
+      </div>
+
+      {{- /* ---- One column per [[params.footer.links]] block ---- */ -}}
+      {{- range $links }}
+        <div class="rf-footer__col">
+          <h2 class="rf-footer__heading">{{ .title }}</h2>
+          <ul class="rf-footer__links">
+            {{- range .items }}
+              {{- $svg := partial "svg-icon.html" .icon -}}
+              <li>
+                <a href="{{ .url | relLangURL }}">
+                  {{- if $svg }} {{ $svg | safeHTML }}
+                  {{- else }}{{ with .icon }} <span aria-hidden="true">{{ . }}</span>{{ end }}{{ end }}
+                  {{ .name }}
+                </a>
+              </li>
+            {{- end }}
+          </ul>
+        </div>
+      {{- end }}
+
+      {{- /* ---- Last column: badges and social links ---- */ -}}
+      <div class="rf-footer__col rf-footer__col--badges">
+        <h2 class="rf-footer__heading">{{ $f.badgesTitle | default "Web Rings & Badges" }}</h2>
+
+        <div class="rf-badges">
+          {{- range $badges }}
+            {{- if .url }}<a href="{{ .url }}" rel="noopener" title="{{ .alt }}">{{ end }}
+            <img src="{{ .image | relURL }}" alt="{{ .alt }}" width="88" height="31" loading="lazy">
+            {{- if .url }}</a>{{ end }}
+          {{- end }}
+
+          {{- if $useDefaultBadges }}
+            {{- range (slice
+                  (dict "image" "images/badges/best-viewed-800x600.svg" "alt" "Best viewed in 800x600")
+                  (dict "image" "images/badges/html5-valid.svg"         "alt" "Valid HTML5")
+                  (dict "image" "images/badges/css-valid.svg"           "alt" "Valid CSS3")
+                  (dict "image" "images/badges/made-with-hugo.svg"      "alt" "Made with Hugo")) }}
+              <img src="{{ .image | relURL }}" alt="{{ .alt }}" width="88" height="31" loading="lazy">
+            {{- end }}
+          {{- end }}
+        </div>
+
+        {{- with $social }}
+          <ul class="rf-social" aria-label="Social links">
+            {{- range . }}
+              {{- $svg := partial "svg-icon.html" .icon -}}
+              <li>
+                <a href="{{ .url }}" rel="noopener me" title="{{ .name }}">
+                  {{- if $svg }}{{ $svg | safeHTML }}
+                  {{- else }}<span aria-hidden="true">{{ .icon | default "🔗" }}</span>{{ end }}
+                  <span class="rf-visually-hidden">{{ .name }}</span>
+                </a>
+              </li>
+            {{- end }}
+          </ul>
+        {{- end }}
+
+        {{- if $f.backToTop | default true }}
+          <p class="rf-footer__totop">
+            <a class="rf-btn rf-btn--sm" href="#top" data-rf-totop>
+              <span aria-hidden="true">▲</span> Back to Top
+            </a>
+          </p>
+        {{- end }}
+      </div>
+
+    </div>
+
+    {{- /* ---- Bottom bar ---- */ -}}
+    <div class="rf-footer__bottom">
+      <p class="rf-footer__copy">
+        {{- if $f.copyright }}
+          {{ $f.copyright | safeHTML }}
+        {{- else }}
+          &copy; {{ now.Year }} {{ .Site.Title }}. All rights reserved.
+        {{- end }}
+      </p>
+
+      {{- /* Attribution line under the copyright. builtWith replaces the text,
+         showBuiltWith = false drops the line. */ -}}
+      {{- if $f.showBuiltWith | default true }}
+        {{- $themeURL := .Site.Params.themeURL | default "https://github.com/hellofuji/retro-fusion" -}}
+        {{- $defaultBuilt := printf `Powered by <a href="https://gohugo.io/" rel="noopener">Hugo</a> · Theme <a href="%s" rel="noopener">Retro Fusion</a>` $themeURL -}}
+        <p class="rf-footer__built">{{ $f.builtWith | default $defaultBuilt | safeHTML }}</p>
+      {{- end }}
+
+      {{- with $f.bottomText }}<p class="rf-footer__note">{{ . | safeHTML }}</p>{{ end }}
+    </div>
+
+  </div>
+</footer>

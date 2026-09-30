@@ -1,0 +1,59 @@
+{{/* baseof.html - the skeleton every page inherits.
+     Blocks: breadcrumbs, main, scripts, head-extra. */}}
+{{- $mode := .Site.Params.mode | default "blog" -}}
+{{- $theme := .Site.Params.theme | default dict -}}
+{{- $feat := .Site.Params.features | default dict -}}
+<!DOCTYPE html>
+{{- /* .Lang works on every Hugo version (LanguageCode/LanguageDirection were
+       deprecated in 0.158). For RTL sites set params.languageDirection = "rtl". */ -}}
+<html lang="{{ .Site.Language.Lang | default "en" }}"
+      dir="{{ .Site.Params.languageDirection | default "ltr" }}"
+      data-mode="{{ $mode }}"
+      data-tile="{{ $theme.tile | default "none" }}">
+<head>
+  {{ partial "head.html" . }}
+</head>
+<body id="top" class="rf-body mode-{{ $mode }} kind-{{ .Kind }}{{ if .IsHome }} is-home{{ end }}{{ if .IsPage }} is-page{{ end }}{{ if $theme.scanlines }} has-scanlines{{ end }}">
+
+  <a class="rf-skip-link" href="#main">Skip to main content</a>
+
+  {{ partial "analytics.html" (dict "page" . "position" "body-start") }}
+
+  <div class="rf-shell">
+
+    {{ partial "header.html" . }}
+
+    {{- /* Note: `block` runs in its own scope, so the guard lives inside the
+           partial rather than referencing $feat from here. */ -}}
+    {{ block "breadcrumbs" . }}
+      {{ partial "breadcrumbs.html" . }}
+    {{ end }}
+
+    {{- /* The <main> landmark. `id="main"` is what the skip link jumps to, and
+           `tabindex="-1"` lets scripts move focus here without adding a tab
+           stop. Without this the skip link had no target at all. */ -}}
+    <main id="main" tabindex="-1">
+      {{ block "main" . }}{{ end }}
+    </main>
+
+    {{ partial "footer.html" . }}
+
+  </div>
+
+  {{ if .Site.Params.footer.backToTop | default true }}
+    <button type="button" class="rf-totop" id="rf-back-to-top" hidden aria-label="Back to top">
+      <span aria-hidden="true">▲</span> Top
+    </button>
+  {{ end }}
+
+  {{ partial "analytics.html" (dict "page" . "position" "body-end") }}
+
+  {{- /* ---- Theme JS (deferred; everything degrades gracefully without it) --- */ -}}
+  <script src="{{ "js/main.js" | relURL }}" defer></script>
+  {{- range (.Site.Params.customJS | default slice) }}
+  <script src="{{ . | relURL }}" defer></script>
+  {{- end }}
+
+  {{ block "scripts" . }}{{ end }}
+</body>
+</html>

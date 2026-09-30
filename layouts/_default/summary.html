@@ -1,0 +1,74 @@
+{{/* summary.html - the post card. This is a content view, not a layout:
+     call it with {{ .Render "summary" }} from a list.
+
+     Optional front matter: featured, cover.image, cover.alt. */}}
+{{- $showThumb := .Site.Params.list.showThumbnails | default true -}}
+{{- $showTags  := .Site.Params.list.showTags | default true -}}
+{{- $excerptLen := .Site.Params.list.excerptLength | default 220 -}}
+
+{{- /* How many tag chips to show. Chips can't wrap internally, so a row that
+       doesn't fit spills or clips, so capping the count keeps a tile
+       tidy. Grid tiles are much narrower than the full-width list, so they get
+       a smaller cap. Override with params.list.maxTags / maxTagsGrid. */ -}}
+{{- $cols := .Site.Params.list.columns | default 1 -}}
+{{- $maxTags := .Site.Params.list.maxTags | default 3 -}}
+{{- if gt $cols 1 -}}
+  {{- $maxTags = .Site.Params.list.maxTagsGrid | default 2 -}}
+{{- end -}}
+
+{{- $img := "" -}}
+{{- with .Params.cover }}{{ with .image }}{{ $img = . }}{{ end }}{{ end -}}
+
+<article class="rf-card rf-card--post{{ if .Params.featured }} is-featured{{ end }}">
+
+  <h2 class="rf-card__title">
+    <a href="{{ .RelPermalink }}">
+      {{- with .Params.featured }}<span class="rf-flag" title="Featured">★</span> {{ end -}}
+      {{ .Title }}
+    </a>
+  </h2>
+
+  {{ partial "post-meta.html" (dict "page" . "context" "list") }}
+
+  <div class="rf-card__body">
+    {{- if $showThumb }}
+      {{- /* Always emitted, cover image or not. A post without a cover gets a
+             retro placeholder of the same aspect ratio, so cards keep a common
+             height instead of the imageless ones being shorter. Decorative:
+             aria-hidden + tabindex="-1" because the title link follows. */ -}}
+      <a class="rf-card__thumb{{ if not $img }} rf-card__thumb--placeholder{{ end }}"
+         href="{{ .RelPermalink }}" tabindex="-1" aria-hidden="true">
+        {{- if $img }}
+          <img src="{{ $img | relURL }}"
+               alt="{{ with .Params.cover }}{{ .alt | default $.Title }}{{ else }}{{ .Title }}{{ end }}"
+               loading="lazy" decoding="async">
+        {{- else }}
+          <span class="rf-card__thumb-mark">★</span>
+        {{- end }}
+      </a>
+    {{- end }}
+
+    <div class="rf-card__text">
+      {{- /* .rf-card__excerpt is line-clamped in CSS so every card in a row
+             ends up the same height regardless of how long the summary is.
+             Set params.list.excerptLines to change the clamp. */ -}}
+      <p class="rf-card__excerpt">{{ .Summary | plainify | htmlUnescape | truncate $excerptLen }}</p>
+
+      {{- if $showTags }}
+        {{- /* Always rendered, even with no tags, so the element holds a fixed
+               one-row height so tagged and untagged cards line up. */ -}}
+        <p class="rf-card__tags">
+          {{- range first $maxTags (.GetTerms "tags") }}
+            <a class="rf-chip" href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>
+          {{- end }}
+        </p>
+      {{- end }}
+
+      <p class="rf-card__more">
+        <a class="rf-btn rf-btn--sm rf-btn--primary" href="{{ .RelPermalink }}">
+          Read more <span aria-hidden="true">»</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</article>

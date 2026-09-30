@@ -1,0 +1,10 @@
+{{/* Grid class for a post-card list, from params.list.columns: 1 is the
+     stacked list, 2-4 a tile grid. Anything else falls back to stacked. */}}
+{{/* One return per partial. Hugo errors on a second one, so the value is
+     built up in a variable first. */}}
+{{- $cols  := .Site.Params.list.columns | default 1 -}}
+{{- $class := "rf-cards rf-cards--stack" -}}
+{{- if and (ge $cols 2) (le $cols 4) -}}
+  {{- $class = printf "rf-cards rf-cards--%d" $cols -}}
+{{- end -}}
+{{- return $class -}}

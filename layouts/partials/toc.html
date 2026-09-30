@@ -1,0 +1,21 @@
+{{/* toc.html - the "Contents" window. Hides itself when a page has no
+     headings. */}}
+{{- $postCfg := .Site.Params.post | default dict -}}
+{{- if and ($postCfg.toc | default true) (ne .Params.toc false) (gt (len .Fragments.Headings) 0) }}
+  {{- $title := $postCfg.tocTitle | default "Table of Contents" -}}
+  {{- $open  := $postCfg.tocOpen | default true -}}
+
+  <details class="rf-window rf-toc" {{ if $open }}open{{ end }}>
+    <summary class="rf-window__bar rf-toc__bar">
+      <span class="rf-window__title">{{ with partial "svg-icon.html" "list" }}{{ . | safeHTML }}{{ end }} {{ $title }}</span>
+      <span class="rf-window__controls" aria-hidden="true">
+        <span class="rf-window__btn">_</span>
+        <span class="rf-window__btn">□</span>
+        <span class="rf-window__btn rf-window__btn--close">×</span>
+      </span>
+    </summary>
+    <nav class="rf-toc__body" aria-label="Table of contents">
+      {{ .TableOfContents }}
+    </nav>
+  </details>
+{{- end }}

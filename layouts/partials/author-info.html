@@ -1,0 +1,25 @@
+{{/* Resolves the author for the sidebar widget and the post "Written by" box.
+     Returns {name, image, bio, link, title}.
+
+     Most specific wins:
+       1. the page's own front matter: author, authorBio, authorImage, authorLink
+       2. params.sidebar.author*
+       3. params.author, params.authorBio, params.authorImage, params.authorLink
+
+     So a guest post sets `author:` in its front matter and gets its own byline,
+     bio and avatar without touching the site config. */}}
+{{- $p  := .Site.Params -}}
+{{- $sb := $p.sidebar | default dict -}}
+
+{{- $name  := .Params.author      | default $sb.authorName  | default $p.author -}}
+{{- $image := .Params.authorImage | default $sb.authorImage | default $p.authorImage -}}
+{{- $bio   := .Params.authorBio   | default $sb.authorBio   | default $p.authorBio -}}
+{{- $link  := .Params.authorLink  | default $sb.authorLink  | default $p.authorLink -}}
+{{- $title := $sb.authorTitle | default "About the Author" -}}
+
+{{- return (dict
+      "name"  ($name | default "Anonymous")
+      "image" $image
+      "bio"   $bio
+      "link"  $link
+      "title" $title) -}}

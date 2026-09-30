@@ -1,0 +1,107 @@
+{{/* head.html - meta tags, SEO, theme colours, stylesheets.
+     Every param is optional; unset ones fall back to the defaults here. */}}
+{{- $theme := .Site.Params.theme | default dict -}}
+{{- $feat  := .Site.Params.features | default dict -}}
+{{- $analytics := .Site.Params.analytics | default dict -}}
+{{- $list := .Site.Params.list | default dict -}}
+
+{{- /* ---- Title & description ------------------------------------------ */ -}}
+{{- $title := .Site.Title -}}
+{{- if not .IsHome -}}
+  {{- $title = printf "%s %s %s" .Title (.Site.Params.titleSeparator | default "::") .Site.Title -}}
+{{- end -}}
+{{- $desc := "" -}}
+{{- with .Description }}{{ $desc = . }}{{ end -}}
+{{- if not $desc -}}
+  {{- if .IsPage }}{{ $desc = .Summary }}{{ else }}{{ $desc = .Site.Params.description }}{{ end -}}
+{{- end -}}
+{{- $desc = $desc | default .Site.Params.description | plainify | htmlUnescape | truncate 180 -}}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+{{ with .Site.Params.author }}<meta name="author" content="{{ . }}">{{ end }}
+
+{{- if $feat.robotsNoindex | default false }}
+<meta name="robots" content="noindex, nofollow">
+{{- end }}
+
+<link rel="canonical" href="{{ .Permalink }}">
+
+{{- /* ---- Feeds & icons ------------------------------------------------ */ -}}
+{{ with .OutputFormats.Get "rss" }}
+  <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ $.Site.Title }} RSS Feed">
+{{ end }}
+{{ with .Site.Params.favicon }}<link rel="icon" href="{{ . | relURL }}">{{ end }}
+{{ with .Site.Params.appleTouchIcon }}<link rel="apple-touch-icon" href="{{ . | relURL }}">{{ end }}
+
+{{- /* ---- Open Graph / Twitter ----------------------------------------- */ -}}
+{{- if $feat.opengraph | default true }}
+  {{ template "_internal/opengraph.html" . }}
+  {{ template "_internal/twitter_cards.html" . }}
+{{- end }}
+
+{{- /* JSON-LD structured data: WebSite / BlogPosting / WebPage / CollectionPage */ -}}
+{{- if $feat.schema | default true }}{{ partial "schema.html" . }}{{ end }}
+
+{{- /* ---- Optional pixel font (only loaded when configured) ------------- */ -}}
+{{- with $theme.pixelFontURL }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{{ . }}">
+{{- end }}
+
+{{- /* ---- Palette: params -> CSS custom properties --------------------
+       safeCSS is needed here because Go html/template applies a CSS value
+       filter that rejects valid font stacks (quoted names, commas) and
+       substitutes ZgotmplZ for them.
+  -------------------------------------------------------------------- */ -}}
+<style>
+  :root{
+    --rf-bg:           {{ $theme.bg           | default "#c0c0c0" | safeCSS }};
+    --rf-bg-alt:       {{ $theme.bgAlt        | default "#d4d0c8" | safeCSS }};
+    --rf-surface:      {{ $theme.surface      | default "#ffffff" | safeCSS }};
+    --rf-surface-alt:  {{ $theme.surfaceAlt   | default "#f4f4f4" | safeCSS }};
+    --rf-ink:          {{ $theme.ink          | default "#101010" | safeCSS }};
+    --rf-ink-soft:     {{ $theme.inkSoft      | default "#4a4a4a" | safeCSS }};
+    --rf-primary:      {{ $theme.primary      | default "#000080" | safeCSS }};
+    --rf-primary-alt:  {{ $theme.primaryAlt   | default "#008080" | safeCSS }};
+    --rf-accent:       {{ $theme.accent       | default "#ff2d95" | safeCSS }};
+    --rf-accent-2:     {{ $theme.accentAlt    | default "#ffcc00" | safeCSS }};
+    --rf-link:         {{ $theme.link         | default "#0000ee" | safeCSS }};
+    --rf-link-visited: {{ $theme.linkVisited  | default "#551a8b" | safeCSS }};
+    --rf-border:       {{ $theme.border       | default "#000000" | safeCSS }};
+    --rf-bevel-light:  {{ $theme.bevelLight   | default "#ffffff" | safeCSS }};
+    --rf-bevel-dark:   {{ $theme.bevelDark    | default "#6e6e6e" | safeCSS }};
+    --rf-radius:       {{ $theme.radius       | default "0"       | safeCSS }};
+
+    --rf-font-body:  {{ $theme.fontBody  | default "Verdana, Geneva, 'DejaVu Sans', sans-serif"   | safeCSS }};
+    --rf-font-head:  {{ $theme.fontHead  | default "'Trebuchet MS', 'Segoe UI', Verdana, sans-serif" | safeCSS }};
+    --rf-font-mono:  {{ $theme.fontMono  | default "'Courier New', Courier, monospace"            | safeCSS }};
+    --rf-font-pixel: {{ $theme.pixelFont | default "var(--rf-font-head)"                          | safeCSS }};
+
+    --rf-max-width: {{ $theme.maxWidth | default "1080px" | safeCSS }};
+    --rf-gap:       {{ $theme.gap      | default "20px"   | safeCSS }};
+
+    /* Keeps post cards uniform: excerpts and titles are clamped to this many
+       lines so every card in a row is the same height. */
+    --rf-excerpt-lines: {{ $list.excerptLines | default 3 | safeCSS }};
+    --rf-title-lines:   {{ $list.titleLines   | default 2 | safeCSS }};
+  }
+  {{ with $theme.customCSSVars }}{{ . | safeCSS }}{{ end }}
+</style>
+
+{{- /* ---- Core stylesheet --------------------------------------------- */ -}}
+{{- $css := "css/style.css" | relURL -}}
+<link rel="stylesheet" href="{{ $css }}">
+
+{{- range (.Site.Params.customCSS | default slice) }}
+<link rel="stylesheet" href="{{ . | relURL }}">
+{{- end }}
+
+{{- /* ---- User-supplied <head> code (meta tags, fonts, webring, etc.) --- */ -}}
+{{ with $analytics.custom }}{{ with .head }}{{ . | safeHTML }}{{ end }}{{ end }}
+
+{{ block "head-extra" . }}{{ end }}

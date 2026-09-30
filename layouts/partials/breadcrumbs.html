@@ -1,0 +1,48 @@
+{{/* breadcrumbs.html - Home > Section > Page, plus BreadcrumbList JSON-LD.
+     .Ancestors already ends at the home page, so there's no manual root link.
+     Renders nothing on the home page itself. */}}
+{{- $feat := .Site.Params.features | default dict -}}
+{{- if and (not .IsHome) ($feat.breadcrumbs | default true) }}
+{{- $ancestors := .Ancestors.Reverse -}}
+{{- $sep := .Site.Params.breadcrumbSeparator | default "›" -}}
+
+<nav class="rf-breadcrumbs" aria-label="Breadcrumb">
+  <ol class="rf-breadcrumbs__list">
+    {{- range $i, $a := $ancestors }}
+      <li class="rf-breadcrumbs__item">
+        <a href="{{ $a.RelPermalink }}">
+          {{- if $a.IsHome }}{{ with partial "svg-icon.html" "home" }}{{ . | safeHTML }}{{ end }} Home{{ else }}{{ $a.LinkTitle }}{{ end -}}
+        </a>
+        <span class="rf-breadcrumbs__sep" aria-hidden="true">{{ $sep }}</span>
+      </li>
+    {{- end }}
+    <li class="rf-breadcrumbs__item rf-breadcrumbs__item--current" aria-current="page">
+      {{ .LinkTitle }}
+    </li>
+  </ol>
+</nav>
+
+{{- /* Structured data */ -}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {{- range $i, $a := $ancestors }}
+    {
+      "@type": "ListItem",
+      "position": {{ add $i 1 }},
+      "name": {{ if $a.IsHome }}"Home"{{ else }}{{ $a.LinkTitle }}{{ end }},
+      "item": {{ $a.Permalink }}
+    },
+    {{- end }}
+    {
+      "@type": "ListItem",
+      "position": {{ add (len $ancestors) 1 }},
+      "name": {{ .LinkTitle }},
+      "item": {{ .Permalink }}
+    }
+  ]
+}
+</script>
+{{- end }}

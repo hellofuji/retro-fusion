@@ -1,0 +1,45 @@
+{{/* nav-menu.html - renders one menu level and recurses for children.
+     Takes a dict of entries, page (for the current-page check) and level. */}}
+{{- $entries := .entries -}}
+{{- $page    := .page -}}
+{{- $level   := .level | default 1 -}}
+
+{{- with $entries }}
+<ul class="rf-nav__menu rf-nav__menu--l{{ $level }}">
+  {{- range . }}
+    {{- $kids := .Children -}}
+    {{- $hasKids := and $kids (gt (len $kids) 0) -}}
+    {{- $isCurrent := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) -}}
+    <li class="rf-nav__item{{ if $hasKids }} rf-nav__item--has-children{{ end }}{{ if $isCurrent }} is-current{{ end }}">
+
+      {{- if $hasKids }}
+        {{- /* A parent with children: the label is a toggle, but we keep the
+               link too so the landing page stays reachable. On touch the
+               dedicated ▾ button expands the submenu instead of navigating. */ -}}
+        <a class="rf-nav__link" href="{{ .URL }}"
+           {{ if $isCurrent }}aria-current="page"{{ end }}>
+          {{ .Name }}<span class="rf-nav__caret" aria-hidden="true">▾</span>
+        </a>
+        <button type="button"
+                class="rf-nav__sub-toggle"
+                aria-expanded="false"
+                aria-label="Show submenu for {{ .Name }}">
+          <span aria-hidden="true">▾</span>
+        </button>
+      {{- else }}
+        <a class="rf-nav__link" href="{{ .URL }}"
+           {{ if $isCurrent }}aria-current="page"{{ end }}>{{ .Name }}</a>
+      {{- end }}
+
+      {{- with .Pre }}<span class="rf-nav__pre" aria-hidden="true">{{ . | safeHTML }}</span>{{ end -}}
+
+      {{- if $hasKids }}
+        {{ partial "nav-menu.html" (dict
+            "entries" $kids
+            "page"    $page
+            "level"   (add $level 1)) }}
+      {{- end }}
+    </li>
+  {{- end }}
+</ul>
+{{- end }}

@@ -1,0 +1,109 @@
+{{/* terms.html - the index of every term in a taxonomy, e.g. /tags/.
+
+     A tag cloud sized by post count, with a plain table underneath. */}}
+{{ define "main" }}
+
+{{- $kind  := .Data.Singular | default "term" -}}
+{{- $terms := .Pages -}}
+{{- $max   := 0 -}}
+{{- range $terms }}{{ if gt (len .Pages) $max }}{{ $max = len .Pages }}{{ end }}{{ end -}}
+
+<div class="rf-layout">
+
+  <div class="rf-layout__main">
+
+    <section class="rf-window rf-archive-head">
+      <div class="rf-window__bar">
+        <h1 class="rf-window__title">{{ .Title | default ($kind | humanize | title) }}</h1>
+        <span class="rf-window__controls" aria-hidden="true">
+          <span class="rf-window__btn">_</span><span class="rf-window__btn">□</span><span class="rf-window__btn rf-window__btn--close">×</span>
+        </span>
+      </div>
+      <div class="rf-window__body">
+        {{- with .Description }}<p class="rf-archive-head__desc">{{ . }}</p>{{ end }}
+        {{- with .Content }}<div class="rf-prose">{{ . }}</div>{{ end }}
+        <p class="rf-archive-head__count">
+          <span class="rf-count-badge">{{ len $terms }}</span>
+          {{ $kind | humanize | title }} in the index.
+        </p>
+      </div>
+    </section>
+
+    {{- if $terms }}
+
+      {{- /* ---------- Cloud ---------- */ -}}
+      <section class="rf-window rf-terms-cloud">
+        <div class="rf-window__bar">
+          <span class="rf-window__title">{{ $kind | humanize | title }} Cloud</span>
+        </div>
+        <div class="rf-window__body">
+          <p class="rf-cloud rf-cloud--lg">
+            {{- range $terms }}
+              {{- $n := len .Pages -}}
+              {{- $cls := "rf-cloud__t1" -}}
+              {{- if ge $n 10 }}{{ $cls = "rf-cloud__t5" }}
+              {{- else if ge $n 6 }}{{ $cls = "rf-cloud__t4" }}
+              {{- else if ge $n 3 }}{{ $cls = "rf-cloud__t3" }}
+              {{- else if ge $n 2 }}{{ $cls = "rf-cloud__t2" }}{{ end -}}
+              <a class="rf-cloud__tag {{ $cls }}" href="{{ .RelPermalink }}"
+                 title="{{ $n }} post{{ if ne $n 1 }}s{{ end }}">{{ .LinkTitle }}
+                <span class="rf-cloud__count">{{ $n }}</span>
+              </a>
+            {{- end }}
+          </p>
+        </div>
+      </section>
+
+      {{- /* ---------- Table listing (classic retro table layout) ---------- */ -}}
+      <section class="rf-window rf-terms-table">
+        <div class="rf-window__bar">
+          <span class="rf-window__title">All {{ $kind | humanize | title }} (A–Z)</span>
+        </div>
+        <div class="rf-window__body">
+          <div class="rf-table-wrap">
+            <table class="rf-table">
+              <caption class="rf-visually-hidden">List of {{ $kind | humanize }} with post counts</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ $kind | humanize | title }}</th>
+                  <th scope="col" class="rf-table__num">Posts</th>
+                  <th scope="col" class="rf-table__num">Latest</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{- range $terms.ByTitle }}
+                  <tr>
+                    <th scope="row">
+                      <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+                    </th>
+                    <td class="rf-table__num">
+                      <span class="rf-count-badge">{{ len .Pages }}</span>
+                    </td>
+                    <td class="rf-table__num">
+                      {{- with index (.Pages.ByDate.Reverse) 0 }}
+                        <time datetime="{{ .Date.Format "2006-01-02" }}">
+                          {{ .Date.Format (.Site.Params.dateFormat | default "Jan 2, 2006") }}
+                        </time>
+                      {{- end }}
+                    </td>
+                  </tr>
+                {{- end }}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    {{- else }}
+      <div class="rf-window">
+        <div class="rf-window__body rf-empty">
+          <p><strong>No terms yet.</strong> 🚧</p>
+        </div>
+      </div>
+    {{- end }}
+
+  </div>
+
+</div>
+
+{{ end }}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="88" height="31" viewBox="0 0 88 31" role="img" aria-label="Valid CSS3">
+  <rect x="0" y="0" width="88" height="31" fill="#000"/>
+  <rect x="1" y="1" width="86" height="29" fill="#264de4"/>
+  <rect x="1" y="1" width="86" height="29" fill="none" stroke="#000" stroke-width="1"/>
+  <path d="M12 4 h18 v22 l-9 3 -9 -3z" fill="#fff"/>
+  <path d="M15 9 h12 l-1 9 -5 1.6 -5 -1.6z" fill="#264de4"/>
+  <text x="36" y="14" font-family="Verdana,Geneva,sans-serif" font-size="8" font-weight="bold" fill="#fff">CSS</text>
+  <text x="36" y="25" font-family="Verdana,Geneva,sans-serif" font-size="7" font-weight="bold" fill="#ffe600">VALID 3</text>
+</svg>

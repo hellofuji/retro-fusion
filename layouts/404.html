@@ -1,0 +1,39 @@
+{{/* 404.html - not found. Suggests the newest posts as a way back in. */}}
+{{ define "main" }}
+{{- $mainSections := .Site.Params.mainSections | default (slice "posts") -}}
+{{- $posts := where .Site.RegularPages "Section" "in" $mainSections -}}
+
+<div class="rf-layout">
+  <div class="rf-layout__main">
+    <section class="rf-window rf-error">
+      <div class="rf-window__bar">
+        <span class="rf-window__title">Error 404 — not_found.html</span>
+        <span class="rf-window__controls" aria-hidden="true">
+          <span class="rf-window__btn rf-window__btn--close">×</span>
+        </span>
+      </div>
+      <div class="rf-window__body rf-empty">
+        <p class="rf-error__code" aria-hidden="true">404</p>
+        <h1 class="rf-error__title">This page doesn't exist.</h1>
+        <p>The URL you requested could not be found. It may have been deleted,
+           renamed, or it never existed in the first place.</p>
+        <p class="rf-error__actions">
+          <a class="rf-btn rf-btn--primary" href="{{ .Site.Home.RelPermalink }}">« Back to the homepage</a>
+        </p>
+        <p class="rf-blink" aria-hidden="true">🚧 UNDER CONSTRUCTION 🚧</p>
+      </div>
+    </section>
+
+    {{- with first 3 $posts }}
+      <section class="rf-section">
+        <header class="rf-section__head">
+          <h2 class="rf-section__title">Try one of these instead</h2>
+        </header>
+        <div class="rf-cards rf-cards--3">
+          {{- range . }}{{ .Render "summary" }}{{ end }}
+        </div>
+      </section>
+    {{- end }}
+  </div>
+</div>
+{{ end }}

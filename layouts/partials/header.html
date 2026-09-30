@@ -1,0 +1,49 @@
+{{/* header.html - site banner and nav. */}}
+{{- $logo   := .Site.Params.logo    | default dict -}}
+{{- $nav    := .Site.Params.navbar  | default dict -}}
+{{- $tagline := .Site.Params.tagline | default "" -}}
+
+<header class="rf-header">
+  <div class="rf-header__banner">
+
+    <div class="rf-header__brand">
+      <a class="rf-logo" href="{{ .Site.Home.RelPermalink }}" rel="home">
+        {{- if $logo.image }}
+          <img class="rf-logo__img"
+               src="{{ $logo.image | relURL }}"
+               alt="{{ $logo.alt | default .Site.Title }}"
+               {{ with $logo.width }}width="{{ . }}"{{ end }}
+               {{ with $logo.height }}height="{{ . }}"{{ end }}
+               loading="eager" decoding="async">
+        {{- else }}
+          <span class="rf-logo__text rf-logo__text--{{ $logo.style | default "pixel" }}">{{ $logo.text | default .Site.Title }}</span>
+        {{- end }}
+      </a>
+
+      {{- with $tagline }}
+        <p class="rf-tagline">{{ . }}</p>
+      {{- end }}
+    </div>
+
+    {{- if $logo.showBadges | default false }}
+      <div class="rf-header__badges">
+        {{ range (.Site.Params.headerBadges | default slice) }}
+          <img src="{{ .image | relURL }}" alt="{{ .alt }}" width="88" height="31" loading="lazy">
+        {{ end }}
+      </div>
+    {{- end }}
+
+  </div>
+
+  {{- /* ---- Retro scrolling ticker ------------------------------------- */ -}}
+  {{- if and ($nav.marquee | default "") (ne ($nav.showMarquee | default false) false) }}
+    <div class="rf-marquee" role="marquee" aria-label="Announcements">
+      <div class="rf-marquee__track">
+        <span class="rf-marquee__text">{{ $nav.marquee }}</span>
+        <span class="rf-marquee__text" aria-hidden="true">{{ $nav.marquee }}</span>
+      </div>
+    </div>
+  {{- end }}
+
+  {{ partial "navbar.html" . }}
+</header>

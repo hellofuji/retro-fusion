@@ -1,0 +1,66 @@
+{{/* analytics.html - analytics, webring and custom snippets.
+     baseof.html calls this twice; position is "body-start" or "body-end".
+     Nothing loads unless params.analytics is filled in, and
+     params.privacy.disableAnalytics turns the lot off. */}}
+{{- $ctx      := . -}}
+{{- $page     := $ctx.page -}}
+{{- $position := $ctx.position | default "body-end" -}}
+{{- $params   := $page.Site.Params -}}
+{{- $a        := $params.analytics | default dict -}}
+{{- $privacy  := $params.privacy | default dict -}}
+
+{{- /* Never emit analytics on the local dev server, or when switched off. */ -}}
+{{- $enabled := true -}}
+{{- if $privacy.disableAnalytics }}{{ $enabled = false }}{{ end -}}
+{{- if and hugo.IsServer ($privacy.disableAnalyticsLocal | default true) }}{{ $enabled = false }}{{ end -}}
+
+{{- if and $enabled (eq $position "body-start") -}}
+
+  {{- /* ---------- Google Analytics 4 ---------------------------------- */ -}}
+  {{- with $a.google -}}
+    {{- $id := .id | default "" -}}
+    {{- if and $id (not (eq $id "G-XXXXXXXXXX")) }}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ $id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ $id }}', { anonymize_ip: {{ $privacy.anonymizeIP | default true }} });
+</script>
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* ---------- Plausible ------------------------------------------- */ -}}
+  {{- with $a.plausible -}}
+    {{- $domain := .domain | default "" -}}
+    {{- if $domain }}
+<script defer
+        data-domain="{{ $domain }}"
+        src="{{ .script_url | default "https://plausible.io/js/script.js" }}"></script>
+    {{- end -}}
+  {{- end -}}
+
+{{- else if and $enabled (eq $position "body-end") -}}
+
+  {{- /* ---------- Webring ----------
+       The Web 1.0 ring navigator. Configure under [params.analytics.webring]:
+       enable, name, prev, next, random, list.
+  --------------------------------------------------------------------- */ -}}
+  {{- with $a.webring -}}
+    {{- if .enable }}
+<div class="rf-webring" role="navigation" aria-label="Webring">
+  <span class="rf-webring__title">{{ .name | default "Webring" }}</span>
+  <span class="rf-webring__links">
+    {{ with .prev }}<a href="{{ . }}" rel="noopener">&laquo; Prev</a>{{ end }}
+    {{ with .random }}<a href="{{ . }}" rel="noopener">Random</a>{{ end }}
+    {{ with .list }}<a href="{{ . }}" rel="noopener">List</a>{{ end }}
+    {{ with .next }}<a href="{{ . }}" rel="noopener">Next &raquo;</a>{{ end }}
+  </span>
+</div>
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* ---------- Raw custom snippet (footer) -------------------------- */ -}}
+  {{ with $a.custom }}{{ with .footer }}{{ . | safeHTML }}{{ end }}{{ end }}
+
+{{- end -}}

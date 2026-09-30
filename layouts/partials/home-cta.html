@@ -1,0 +1,11 @@
+{{/* Closing call-to-action band, from params.home.cta. */}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- with $home.cta }}
+  <section class="rf-cta">
+    <h2 class="rf-cta__title">{{ .title }}</h2>
+    {{- with .text }}<p class="rf-cta__text">{{ . | safeHTML }}</p>{{ end }}
+    {{- with .button }}
+      <p><a class="rf-btn rf-btn--lg rf-btn--accent" href="{{ .url | relLangURL }}">{{ .label }}</a></p>
+    {{- end }}
+  </section>
+{{- end }}

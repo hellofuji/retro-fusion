@@ -1,0 +1,38 @@
+{{/* services.html - card grid for services or features.
+     Options under params.services. */}}
+{{- $s := .Site.Params.services | default dict -}}
+{{- $items := $s.items | default slice -}}
+{{- if and ($s.enable | default false) (gt (len $items) 0) }}
+
+<section class="rf-section rf-services">
+  <header class="rf-section__head">
+    <h2 class="rf-section__title">{{ $s.title | default "What We Do" }}</h2>
+    {{- with $s.subtitle }}<p class="rf-section__subtitle">{{ . }}</p>{{ end }}
+  </header>
+
+  <div class="rf-cards rf-cards--{{ $s.columns | default 3 }}">
+    {{- range $items }}
+      <article class="rf-card rf-card--service">
+        {{- with .badge }}<span class="rf-badge-flag">{{ . }}</span>{{ end }}
+
+        <div class="rf-card__head">
+          {{- with .icon }}
+            {{- $svg := partial "svg-icon.html" . }}
+            <span class="rf-card__icon" aria-hidden="true">{{ if $svg }}{{ $svg | safeHTML }}{{ else }}{{ . }}{{ end }}</span>
+          {{- end }}
+          <h3 class="rf-card__title">{{ .title }}</h3>
+        </div>
+
+        <div class="rf-card__text">
+          <p>{{ .text }}</p>
+          {{- with .link }}
+            <p class="rf-card__more">
+              <a class="rf-btn rf-btn--sm" href="{{ . | relLangURL }}">{{ $.Site.Params.services.linkLabel | default "Learn more" }} »</a>
+            </p>
+          {{- end }}
+        </div>
+      </article>
+    {{- end }}
+  </div>
+</section>
+{{- end }}

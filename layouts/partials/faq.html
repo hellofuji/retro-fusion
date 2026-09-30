@@ -1,0 +1,32 @@
+{{/* faq.html - accordion built on <details>, so it opens without JS.
+     main.js adds single-open behaviour and #faq-<n> deep links.
+     Options under params.faq. */}}
+{{- $f := .Site.Params.faq | default dict -}}
+{{- $items := $f.items | default slice -}}
+{{- if and ($f.enable | default false) (gt (len $items) 0) }}
+
+<section class="rf-faq" id="faq" data-rf-faq data-single="{{ $f.single | default true }}">
+  <header class="rf-section__head">
+    <h2 class="rf-section__title">{{ $f.title | default "Frequently Asked Questions" }}</h2>
+    {{- with $f.subtitle }}<p class="rf-section__subtitle">{{ . }}</p>{{ end }}
+  </header>
+
+  <div class="rf-faq__list">
+    {{- range $i, $item := $items }}
+      <details class="rf-faq__item" id="faq-{{ add $i 1 }}" {{ if $item.open }}open{{ end }}>
+        <summary class="rf-faq__q">
+          <span class="rf-faq__icon" aria-hidden="true">▸</span>
+          <span class="rf-faq__qtext">{{ $item.question }}</span>
+        </summary>
+        <div class="rf-faq__a">
+          {{ $item.answer | markdownify }}
+        </div>
+      </details>
+    {{- end }}
+  </div>
+
+  {{- with $f.footnote }}
+    <p class="rf-faq__footnote">{{ . | safeHTML }}</p>
+  {{- end }}
+</section>
+{{- end }}

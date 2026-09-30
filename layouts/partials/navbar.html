@@ -1,0 +1,36 @@
+{{/* navbar.html - nav shell. The menu tree comes from nav-menu.html. */}}
+{{- $nav := .Site.Params.navbar | default dict -}}
+{{- $sticky := $nav.sticky | default true -}}
+{{- $center := $nav.centerLogo | default false -}}
+
+<nav class="rf-nav{{ if $sticky }} rf-nav--sticky{{ end }}{{ if $center }} rf-nav--center{{ end }}"
+     id="rf-nav" aria-label="Main navigation">
+
+  <button type="button"
+          class="rf-nav__toggle"
+          id="rf-nav-toggle"
+          aria-expanded="false"
+          aria-controls="rf-nav-menu">
+    <span class="rf-nav__toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="rf-nav__toggle-label">Menu</span>
+  </button>
+
+  <div class="rf-nav__drawer" id="rf-nav-menu">
+    {{ partial "nav-menu.html" (dict
+        "entries" .Site.Menus.main
+        "page"    .
+        "level"   1) }}
+
+    {{- with $nav.searchURL }}
+      <form class="rf-nav__search" action="{{ . | relURL }}" method="get" role="search">
+        <label class="rf-visually-hidden" for="rf-nav-q">Search</label>
+        <input type="search" id="rf-nav-q" name="q" placeholder="Search…" autocomplete="off">
+        <button type="submit" class="rf-btn rf-btn--sm">Go</button>
+      </form>
+    {{- end }}
+
+    {{- with $nav.cta }}
+      <a class="rf-btn rf-btn--primary rf-nav__cta" href="{{ .url | relURL }}">{{ .label }}</a>
+    {{- end }}
+  </div>
+</nav>

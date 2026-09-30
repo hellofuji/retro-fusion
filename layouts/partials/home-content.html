@@ -1,0 +1,14 @@
+{{/* The body of content/_index.md, in a window frame. Renders nothing if
+     that file is empty. */}}
+{{- $home := .Site.Params.home | default dict -}}
+{{- with .Content }}
+  <section class="rf-section rf-window">
+    <div class="rf-window__bar">
+      <span class="rf-window__title">{{ $home.welcomeTitle | default "Welcome" }}</span>
+      <span class="rf-window__controls" aria-hidden="true">
+        <span class="rf-window__btn">_</span><span class="rf-window__btn">□</span><span class="rf-window__btn rf-window__btn--close">×</span>
+      </span>
+    </div>
+    <div class="rf-window__body rf-prose">{{ . }}</div>
+  </section>
+{{- end }}

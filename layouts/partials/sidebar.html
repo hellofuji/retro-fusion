@@ -1,0 +1,164 @@
+{{/* sidebar.html - the widget column. Pass the Page; widgets are toggled
+     under params.sidebar. */}}
+{{- $page := . -}}
+{{- $sb   := $page.Site.Params.sidebar | default dict -}}
+
+{{- if $sb.enable | default true }}
+<aside class="rf-sidebar{{ if $sb.sticky | default true }} rf-sidebar--sticky{{ end }}"
+       aria-label="Sidebar">
+
+  {{- /* ---------- Author bio -------------------------------------------
+       Name, avatar, bio and link come from partials/author-info.html, which
+       reads params.author* and lets params.sidebar.author* override it.
+  ------------------------------------------------------------------ */ -}}
+  {{- if $sb.author | default true }}
+    {{- $a := partial "author-info.html" $page }}
+    <section class="rf-widget rf-widget--author">
+      <h2 class="rf-widget__title">{{ $a.title }}</h2>
+      <div class="rf-widget__body">
+        <div class="rf-author">
+          {{- with $a.image }}
+            <img class="rf-author__avatar" src="{{ . | relURL }}" alt="{{ $a.name }}" width="96" height="96" loading="lazy">
+          {{- end }}
+          <p class="rf-author__name">{{ $a.name }}</p>
+          {{- with $a.bio }}<p class="rf-author__bio">{{ . | safeHTML }}</p>{{ end }}
+          {{- with $a.link }}
+            <p><a class="rf-btn rf-btn--sm" href="{{ . | relURL }}">More about me »</a></p>
+          {{- end }}
+        </div>
+      </div>
+    </section>
+  {{- end }}
+
+  {{- /* ---------- Retro hit counter ------------------------------------ */ -}}
+  {{- if $sb.counter | default true }}
+    {{- $base   := $sb.counterBase   | default 100000 -}}
+    {{- $perDay := $sb.counterPerDay | default 137 -}}
+    {{- $days   := div now.Unix 86400 -}}
+    {{- $hits   := add $base (mul $days $perDay) -}}
+    <section class="rf-widget rf-widget--counter">
+      <h2 class="rf-widget__title">{{ $sb.counterTitle | default "Visitors" }}</h2>
+      <div class="rf-widget__body">
+        <p class="rf-counter-label">You are visitor number:</p>
+        <p class="rf-counter"
+           data-rf-counter
+           data-base="{{ $hits }}">
+          <span class="rf-counter__digits">{{ printf "%07d" $hits }}</span>
+        </p>
+        <p class="rf-counter-note">
+          <span class="rf-blink" aria-hidden="true">●</span>
+          {{ $sb.counterNote | default "Online now — welcome, web traveler!" }}
+        </p>
+      </div>
+    </section>
+  {{- end }}
+
+  {{- /* ---------- Recent posts ----------------------------------------- */ -}}
+  {{- if $sb.recent | default true }}
+    {{- $count  := $sb.recentCount | default 5 -}}
+    {{- $secs   := $page.Site.Params.mainSections | default (slice "posts") -}}
+    {{- /* Sorted by date. Hugo orders pages by weight first, so a post given a
+           weight for menu ordering would otherwise jump to the top here. */ -}}
+    {{- $recent := (where $page.Site.RegularPages "Section" "in" $secs).ByDate.Reverse -}}
+    {{- with first $count $recent }}
+      <section class="rf-widget rf-widget--recent">
+        <h2 class="rf-widget__title">{{ $sb.recentTitle | default "Fresh Off the Press" }}</h2>
+        <div class="rf-widget__body">
+          <ul class="rf-widget__list">
+            {{- range . }}
+              <li>
+                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+                <time class="rf-widget__date" datetime="{{ .Date.Format "2006-01-02" }}">
+                  {{ .Date.Format ($page.Site.Params.dateFormat | default "Jan 2, 2006") }}
+                </time>
+              </li>
+            {{- end }}
+          </ul>
+        </div>
+      </section>
+    {{- end }}
+  {{- end }}
+
+  {{- /* ---------- Categories ------------------------------------------- */ -}}
+  {{- if $sb.categories | default true }}
+    {{- with $page.Site.Taxonomies.categories }}
+      <section class="rf-widget rf-widget--cats">
+        <h2 class="rf-widget__title">{{ $sb.categoriesTitle | default "Categories" }}</h2>
+        <div class="rf-widget__body">
+          <ul class="rf-widget__list rf-widget__list--bullets">
+            {{- range .ByCount }}
+              <li>
+                <a href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a>
+                <span class="rf-count-badge">{{ .Count }}</span>
+              </li>
+            {{- end }}
+          </ul>
+        </div>
+      </section>
+    {{- end }}
+  {{- end }}
+
+  {{- /* ---------- Tag cloud --------------------------------------------
+       Sized by post count: rf-cloud__t1 is the smallest, t5 the largest.
+  ------------------------------------------------------------------- */ -}}
+  {{- if $sb.tags | default true }}
+    {{- with $page.Site.Taxonomies.tags }}
+      {{- $tags := first ($sb.tagCount | default 24) .ByCount -}}
+      <section class="rf-widget rf-widget--tags">
+        <h2 class="rf-widget__title">{{ $sb.tagsTitle | default "Tags" }}</h2>
+        <div class="rf-widget__body">
+          <p class="rf-cloud">
+            {{- range $tags }}
+              {{- $w := .Count -}}
+              {{- $cls := "rf-cloud__t1" -}}
+              {{- if ge $w 8 }}{{ $cls = "rf-cloud__t5" }}
+              {{- else if ge $w 5 }}{{ $cls = "rf-cloud__t4" }}
+              {{- else if ge $w 3 }}{{ $cls = "rf-cloud__t3" }}
+              {{- else if ge $w 2 }}{{ $cls = "rf-cloud__t2" }}{{ end -}}
+              <a class="rf-cloud__tag {{ $cls }}" href="{{ .Page.RelPermalink }}"
+                 title="{{ .Count }} post{{ if ne .Count 1 }}s{{ end }}">{{ .Page.LinkTitle }}</a>
+            {{- end }}
+          </p>
+        </div>
+      </section>
+    {{- end }}
+  {{- end }}
+
+  {{- /* ---------- Custom HTML widgets ---------------------------------- */ -}}
+  {{- range ($sb.widgets | default slice) }}
+    <section class="rf-widget">
+      <h2 class="rf-widget__title">{{ .title }}</h2>
+      <div class="rf-widget__body">{{ .content | safeHTML }}</div>
+    </section>
+  {{- end }}
+
+  {{- /* ---------- Badges ----------
+       The 88x31 strip for other sites to link back with. Falls back to the
+       badges that ship with the theme, and renders nothing when there are
+       none, rather than leaving an empty titled box.
+  -------------------------------------------------------------- */ -}}
+  {{- if $sb.badges | default false }}
+    {{- $badges := $page.Site.Params.footer.badges | default slice -}}
+    {{- if and (eq (len $badges) 0) ($page.Site.Params.footer.defaultBadges | default true) -}}
+      {{- $badges = slice
+            (dict "image" "images/badges/best-viewed-800x600.svg" "alt" "Best viewed in 800x600")
+            (dict "image" "images/badges/html5-valid.svg"         "alt" "Valid HTML5")
+            (dict "image" "images/badges/css-valid.svg"           "alt" "Valid CSS3")
+            (dict "image" "images/badges/made-with-hugo.svg"      "alt" "Made with Hugo") -}}
+    {{- end -}}
+    {{- with $badges }}
+      <section class="rf-widget rf-widget--badges">
+        <h2 class="rf-widget__title">{{ $sb.badgesTitle | default "Link Back" }}</h2>
+        <div class="rf-widget__body">
+          <div class="rf-badges">
+            {{- range . }}
+              <img src="{{ .image | relURL }}" alt="{{ .alt }}" width="88" height="31" loading="lazy">
+            {{- end }}
+          </div>
+        </div>
+      </section>
+    {{- end }}
+  {{- end }}
+
+</aside>
+{{- end }}
