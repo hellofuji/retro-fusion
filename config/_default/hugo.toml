@@ -1,7 +1,3 @@
-# Lets `hugo` run from inside this directory with no extra flags, which is
-# what the Hugo themes build test does. Your own site does not need this.
-themesDir = "../.."
-
 # ============================================================================
 # Retro Fusion - example site configuration
 # ----------------------------------------------------------------------------

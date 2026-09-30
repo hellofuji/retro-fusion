@@ -35,12 +35,12 @@ business landing page. Everything else is optional.
 - JSON-LD, Open Graph, sitemap and robots out of the box
 
 ## Screenshots
+*Blog mode. Set `mode = "business"` for the landing-page layout instead.*
 
 | | |
 |---|---|
 | ![Blog mode homepage](docs/retro-fusion-blog-homepage.png) | ![Business mode homepage](docs/retro-fusion-biz-homepage.png) |
 | ![A single post](docs/retro-fusion-single-post-page.png) | ![List](docs/retro-fusion-list-page.png) |
-
 
 ## Install
 
