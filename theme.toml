@@ -1,10 +1,10 @@
-# theme.toml - metadata for the Hugo themes showcase. Not site config;
-# see exampleSite/hugo.toml for the settings you actually edit.
+# retro-fusion theme for Hugo
 
 name = "Retro Fusion"
 license = "MIT"
 licenselink = "https://github.com/hellofuji/retro-fusion/blob/main/LICENSE"
-description = "A small Hugo theme inspired by early web culture. One stylesheet, one script, no build step, no third-party requests."
+description = "A simple Hugo theme designed around the aesthetic of 2000s personal websites."
+
 homepage = "https://github.com/hellofuji/retro-fusion"
 demosite = "https://retro-fusion.abhishkkumar.com/"
 
@@ -30,6 +30,7 @@ features = [
   "JSON-LD, Open Graph, sitemap and robots out of the box",
   "Works without JavaScript; reduced-motion and high-contrast aware"
 ]
+
 min_version = "0.146.0"
 
 
