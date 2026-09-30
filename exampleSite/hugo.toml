@@ -14,7 +14,7 @@ themesDir = "../.."
 # Your real domain, with the trailing slash. It feeds canonical URLs, the
 # sitemap, the Open Graph tags and the RSS feed, so leaving a placeholder here
 # points all of them at a domain you don't own.
-baseURL = "https://example.org/"
+baseURL = "https://retro-fusion.abhishkkumar.com/"
 title   = "Retro Fusion"
 theme   = "retro-fusion"
 
@@ -514,7 +514,7 @@ enableEmoji = true
   #   list   = "https://example.org/ring/"
 
   [params.privacy]
-    disableAnalytics      = false
+    disableAnalytics      = true
     # Never fire analytics on `hugo server`.
     disableAnalyticsLocal = true
     anonymizeIP           = true
