@@ -83,7 +83,7 @@ hugo server
 Every other setting has a working default. The demo's `hugo.toml` is the full
 reference, with every option present and commented. 
 
-If you want, you simple copy the `exampleSite/hugo.toml` to the root of your hugo site.
+You can also copy `exampleSite/hugo.toml` straight into the root of your own site.
 
 ## Documentation
 
