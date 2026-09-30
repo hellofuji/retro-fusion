@@ -40,8 +40,8 @@ business landing page. Everything else is optional.
 
 | | |
 |---|---|
-| ![Blog mode homepage](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/docs/retro-fusion-blog-homepage.png) | ![Business mode homepage](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/docs/retro-fusion-biz-homepage.png) |
-| ![A single post](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/docs/retro-fusion-single-post-page.png) | ![List](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/docs/retro-fusion-list-page.png) |
+| ![Blog mode homepage](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/images/retro-fusion-blog-homepage.png) | ![Business mode homepage](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/images/retro-fusion-biz-homepage.png) |
+| ![A single post](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/images/retro-fusion-single-post-page.png) | ![List](https://raw.githubusercontent.com/hellofuji/retro-fusion/main/images/retro-fusion-list-page.png) |
 
 ## Install
 
